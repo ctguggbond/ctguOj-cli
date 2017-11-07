@@ -5,9 +5,10 @@ python大作业
 
 #使用的库
 requsts
-bs4
+#html解析
+bs4 
 
 #验证码识别
-pip3 install pillow 
-pip3 install tesseract-ocr
-sudo yum install tesseract-devel leptonica-devel
+pillow 
+tesseract-ocr
+leptonica-devel

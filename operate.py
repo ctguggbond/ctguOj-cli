@@ -2,13 +2,13 @@ from api import *
 import json
 from bs4 import BeautifulSoup
 from ShowMessage import ShowMessage
+from contest import Contest
+
 
 
 #判断是否登录
 def is_login():
     userInfo = session.get("http://192.168.9.210/acmctgu/UserAction!login.action")
-    
-    
 
 #登录
 def login():
@@ -36,13 +36,20 @@ def showContestList():
     
     for data in datalist:
         if data['status'] == 'running':
-            print(data)
+            c = Contest()
+            c.Cid = data['id']
+            c.Ctype = data['isjava']
+            c.title = data['papername']
+            c.endTime = data['endtime']
+            c.teacherName = data['teachername']
+            c.problemDetail()
 
 #显示题目
 def showProblem(id):
     resp = getProblem(id)
-    print(resp.text)
+    jdata = json.loads(resp.text)
+    
     
 if __name__ == "__main__" :
-    showProblem("185")
+    showContestList()
 
