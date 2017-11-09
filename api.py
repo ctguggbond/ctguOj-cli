@@ -65,3 +65,15 @@ def getProblem(id):
     action="http://192.168.9.210/acmctgu/Exam/ExamAction!beginExam.action?id="+id+"&type=1"
     resp = session.get(action)
     return resp
+
+#获取所有排名列表
+def getRankList():
+    action  = "http://192.168.9.210/acmctgu/Exam/ExamAction!showRank.action"
+    resp = session.get(action)
+    return resp
+
+#获取排名
+def getRanking(id):
+    action = "http://192.168.9.210/acmctgu/Exam/ExamAction!rankInfo.action?id="+id
+    resp = session.get(action)
+    return resp

@@ -15,3 +15,6 @@ leptonica-devel
 
 #html解析
 lxml#开始用自带的htmlparser 死活找不全。。我还以为方法错了
+
+
+中英文字符串对齐最终靠谱解决方案：'{:<{l}}'.format(text),l= 50-len(text.encode('GBK'))+len(text))
