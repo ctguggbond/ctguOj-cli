@@ -6,10 +6,10 @@ class Contest:
           pass
 
     def problemDetail(self):
-        Cid = termcolor.colored(self.Cid, 'yellow')
+        Cid = termcolor.colored(self.Cid, 'magenta')
         title = termcolor.colored(self.title, 'white')
         Ctype = termcolor.colored(self.Ctype, 'blue')
-        endTime = termcolor.colored("(" + self.endTime + ")", 'green')
+        endTime = termcolor.colored("(" + self.endTime + ")", 'red')
         teacherName = termcolor.colored(self.teacherName, 'red')
-        info = '\n'.join([Cid + '\t' + ' '+  title + '\t\t' + Ctype + ' ' + endTime + ' '+ teacherName])
+        info = '\n'.join(['['+Cid + ']' + ' ' + '{:30}'.format(title) + Ctype + ' ' + endTime + ' '+ teacherName])
         print(info)

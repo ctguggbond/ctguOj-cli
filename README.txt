@@ -12,3 +12,6 @@ bs4
 pillow 
 tesseract-ocr
 leptonica-devel
+
+#html解析
+lxml#开始用自带的htmlparser 死活找不全。。我还以为方法错了

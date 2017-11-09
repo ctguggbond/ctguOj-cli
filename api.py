@@ -14,9 +14,12 @@ headers={
 session = requests.session()
 login_url = 'http://192.168.9.210/acmctgu/UserAction!login.action'
 session.cookies = cookiejar.LWPCookieJar("cookies")
-session.cookies.load(ignore_discard=True, ignore_expires=True)
 
-
+try:
+    session.cookies.load(ignore_discard=True, ignore_expires=True)
+except:
+    pass
+    
 username=''
 password=''
 
