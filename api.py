@@ -53,7 +53,12 @@ def postLogin():
     
     resp = session.post(login_url,data=data, headers=headers)
     return resp
-
+#获取个人信息，用于判断是否登录
+def getInfo():
+    action = "http://192.168.9.210/acmctgu/UserAction!userInfo.action"
+    resp = session.post(action,headers=headers)
+    return resp
+    
 #获取比赛题目列表
 def getContest():
     action="http://192.168.9.210/acmctgu/PaperAction/PaperAction!getPapers.action?&selectOne=&teacherOrexam=&status=&isjava=&index=1"
@@ -61,8 +66,14 @@ def getContest():
     return resp
 
 #获取题目
-def getProblem(id):
-    action="http://192.168.9.210/acmctgu/Exam/ExamAction!beginExam.action?id="+id+"&type=1"
+def getProblem(Cid,Ctype):
+    action="http://192.168.9.210/acmctgu/Exam/ExamAction!beginExam.action?id="+Cid+"&type="+Ctype
+    resp = session.get(action)
+    return resp
+
+#输入密码获取题目
+def getPasswordProblem(Pid,password):
+    action = "http://192.168.9.210/acmctgu/Paper/PaperAction!checkpw.action?password="+password+"&id="+Pid
     resp = session.get(action)
     return resp
 
@@ -76,4 +87,15 @@ def getRankList():
 def getRanking(id):
     action = "http://192.168.9.210/acmctgu/Exam/ExamAction!rankInfo.action?id="+id
     resp = session.get(action)
+    return resp
+
+#提交代码,返回判题信息
+def getSubResp(code,Pid,Ctype):
+    action = "http://192.168.9.210/acmctgu/ExamAction/CheckAction!checkAnswer.action"
+    data = {
+        'answer': code,
+        'id': Pid,
+        'type': Ctype
+    }
+    resp = session.post(action,data=data, headers=headers)
     return resp

@@ -20,11 +20,20 @@ class Problem:
         info5 = termcolor.colored('输出样例:','magenta')
         
         info = '\n'.join(['Id:['+Pid + ']' + '\t\t' + title,timeAndMem,info1,content,info2,descr_input,info3,descr_output,info4,ex_input,info5,ex_output])
-        print('\n\n' + info)
+        return '\n\n' + info
         
     def problemSimple(self):
         Pid = termcolor.colored(self.Pid, 'magenta')
         title = termcolor.colored(self.title, 'white')
         simpleInfo = ''.join('[' + Pid + ']' + '\t' + title)
-        print(simpleInfo)
+        return simpleInfo
         
+    def problemContent(self):
+        info1 = '题目内容:'
+        info2 = '输入描述:'
+        info3 = '输出描述:'
+        info4 = '输入样例:'
+        info5 = '输出样例:'
+        
+        info = '\n'.join(['Id:['+self.Pid + ']' + '\t',self.title,self.timeAndMem,info1,self.content,info2,self.descr_input,info3,self.descr_output,info4,self.ex_input,info5,self.ex_output])
+        return '\n' + info

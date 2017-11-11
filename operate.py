@@ -9,28 +9,36 @@ from userInfo import UserInfo
 import re
 
 
-
 #先加载保存的数据#############
 #比赛id以及以及使用的语言信息
-contestInfo = [185,0] 
+
+contestInfo = ['185','0'] 
 
 try:
     with open('contestInfo.json','r') as file_object:
         contestInfo = json.load(file_object)
 except:
     ShowMessage.error("请先使用'ctguoj use cid'选择要参加的比赛")
-x
+    exit
+
 ############################
 
 
 #判断是否登录
 def is_login():
-    userInfo = session.get("http://192.168.9.210/acmctgu/UserAction!login.action")
+    resp = getInfo()
+    soup = BeautifulSoup(resp.text,"lxml")
+    islogin = soup.find_all(text='用户名')
 
+    if islogin :
+        return True
+    else :
+        return False
+    
 #登录
 def login():
     resp = postLogin()
-    soup = BeautifulSoup(resp.text,"html.parser")
+    soup = BeautifulSoup(resp.text,"lxml")
     divlist = soup.find_all('div',class_ = 'user')
     
     if len(divlist) > 3:
@@ -65,9 +73,13 @@ def showContestList(flag):
             c.problemDetail()
     print(''.join('id' + '\t' + '{:35}'.format('名称') + '语言' +
                 '\t' + '结束时间' + '\t\t'+ '出题人'))
+
 #获取题目信息
-def getProblemInfo(Cid,Pid,flag):
-    resp = getProblem(Cid)
+def getProblemInfo(Pid,flag):
+    Cid = contestInfo[0] #比赛id
+    Ctype = contestInfo[1]
+    
+    resp = getProblem(Cid,Ctype)
     soup = BeautifulSoup(resp.text,"lxml")
     #仅获取题目和id
     if flag:
@@ -96,16 +108,16 @@ def getProblemInfo(Cid,Pid,flag):
         return p
 
 #显示题目摘要列表
-def showProblemSimple(Cid,Pid):
-    pList = getProblemInfo(Cid,Pid,True)
+def showProblemSimple():
+    pList = getProblemInfo('',True)
     for p in pList:
-        p.problemSimple()
+        print(p.problemSimple())
 
 #显示题目详细信息
-def showProblemDetail(Cid,Pid):
-    p = getProblemInfo(Cid,Pid,False)
+def showProblemDetail(Pid):
+    p = getProblemInfo(Pid,False)
     os.system('clear')
-    p.problemDetail()
+    print(p.problemDetail())
 
 
 #获取排名列表
@@ -136,12 +148,13 @@ def showRanking(Cid):
     for i in range(0, len(rList))[::-1]:
         rList[i].showUserInfo()
 
-#将当前选择的比赛id 及类型保存至文件
+#将当前选择的比赛id 及类型保存至文件,方便提交代码，不用选择提交类型，以及再次开始直接开始上次的位置
 def saveContestInfo(Cid):
     resp = getContest()
     jdata = json.loads(resp.text)
     datalist = jdata.get('list')
     
+    #没想到什么优雅的办法...就先再查找一边找到类型id
     Ctype = '1'
     for data in datalist:
         if str(data['id']) == Cid:
@@ -153,14 +166,57 @@ def saveContestInfo(Cid):
     
         
 #生成代码模板
-def genCode(Pid):
-    pass
+def genCode(Pid,codetype):
+    p = getProblemInfo(Pid,False)
     
+    title = p.title.split('(')[0].strip()
+    code = '/*' + p.problemContent() + '*/\n\n'
+    code = re.sub(r'\r','',code)
+    
+    ccode = '#include <stdio.h>\nint main(){\n\n    return 0;\n}'
+    cppcode = '#include <iostream> \n#include <cstdio>\nusing namespace std;\nint main()\n{\n    return 0;\n}'
+    javacode = 'import java.util.*\n\npublic class Main(){\n    public static void main(String args[])\n\n}'
+    
+    suffix = '.c'
+    if codetype == 'c':
+        code = code + ccode
+        suffix = '.c'
+    elif codetype == 'c++':
+        suffix = '.cpp'
+        code = code + cppcode
+    elif codetype == 'java':
+        suffix = '.java'
+        code = code + javacode
+        
+    f = open("./"+ Pid+'_'+title+suffix, "w")
+    f.write(code)
+    f.flush()
+    f.close()
+
+
+#提交代码
+def submitCode(fileName):
+    Pid = fileName.split('_')[0]
+    f = open(fileName, "r")
+    code = f.read()
+    f.close()
+    resp = getSubResp(code,Pid,contestInfo[1])
+    {"id":"125","result":"Wrong Answer.","score":0,"time":"21:34:35"}
+    jdata = json.loads(resp.text)
+    result = jdata['result']
+    score = jdata['score']
+    time = jdata['time']
+    #termcolor.colored(self.title, 'white')
+    print(result + '\n' + str(score) + '\n' + time)
 if __name__ == "__main__" :
-    showContestList(False)
-    saveContestInfo('124')
+    is_login()
+#    submitCode("125_极差.cpp")
+    
+#    showProblemDetail('125')
+#    genCode('125','c++')
+#    showContestList(False)
+#    saveContestInfo('124')
 #    showRanking('185')
-#    showProblemDetail('185','125')
 #    showProblemSimple('124','58')
 
 
