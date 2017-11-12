@@ -15,11 +15,10 @@ import re
 contestInfo = ['185','0'] 
 
 try:
-    with open('contestInfo.json','r') as file_object:
+    with open('.contestInfo.json','r') as file_object:
         contestInfo = json.load(file_object)
 except:
-    ShowMessage.error("请先使用'ctguoj use cid'选择要参加的比赛")
-    exit
+    pass
 
 ############################
 
@@ -85,6 +84,9 @@ def getProblemInfo(Pid,flag):
     if flag:
         pList = []
         allProblemDiv = soup.find_all('div',id=re.compile(r'title_\d*'))
+        if not allProblemDiv :
+            ShowMessage.error("比赛不可参加,使用use id重新选择比赛")
+            exit(0)
         for pdiv in allProblemDiv:
             p = Problem()
             p.Pid = re.sub("\D", "",pdiv['id'])
@@ -94,6 +96,9 @@ def getProblemInfo(Pid,flag):
     #获取详细题目信息
     else :
         pdiv = soup.find('div',id='title_'+Pid)
+        if not pdiv:
+            ShowMessage.error("你已经做过了或者没有该题目")
+            exit(0)
         p = Problem()
         p.Pid = re.sub("\D", "",pdiv['id'])
         p.title = pdiv.find('div',class_='nav').string.split('.')[1].strip()
@@ -108,13 +113,15 @@ def getProblemInfo(Pid,flag):
         return p
 
 #显示题目摘要列表
-def showProblemSimple():
+def listProblem():
+    ShowMessage.info("正在加载题目列表...")
     pList = getProblemInfo('',True)
     for p in pList:
         print(p.problemSimple())
 
 #显示题目详细信息
 def showProblemDetail(Pid):
+    ShowMessage.info("正在加载题目...")
     p = getProblemInfo(Pid,False)
     os.system('clear')
     print(p.problemDetail())
@@ -125,7 +132,10 @@ def getRankingList(Cid):
     resp = getRanking(Cid)
     soup = BeautifulSoup(resp.text,"lxml")
     rankingTr = soup.find_all('tr',id=re.compile('\d*'))
-
+    if not  rankingTr:
+        ShowMessage.error("没有该比赛排名...重新选择比赛")
+        exit(0)
+    
     rList = []
     for tr in rankingTr:
         stu = UserInfo()
@@ -142,9 +152,12 @@ def getRankingList(Cid):
     return rList
 
 #显示排名
-def showRanking(Cid):
+def showRanking():
+    Cid = contestInfo[0]
+    ShowMessage.info("加载排名中...")
     rList = getRankingList(Cid)
     #    rList = rList.reverse()
+    
     for i in range(0, len(rList))[::-1]:
         rList[i].showUserInfo()
 
@@ -161,21 +174,22 @@ def saveContestInfo(Cid):
             Ctype = data['isjava']
 
     info = [Cid,Ctype]
-    with open('contestInfo.json','w') as file_object:
+    with open('.contestInfo.json','w') as file_object:
         json.dump(info,file_object)
     
         
 #生成代码模板
 def genCode(Pid,codetype):
     p = getProblemInfo(Pid,False)
-    
+
     title = p.title.split('(')[0].strip()
+
     code = '/*' + p.problemContent() + '*/\n\n'
     code = re.sub(r'\r','',code)
     
     ccode = '#include <stdio.h>\nint main(){\n\n    return 0;\n}'
-    cppcode = '#include <iostream> \n#include <cstdio>\nusing namespace std;\nint main()\n{\n    return 0;\n}'
-    javacode = 'import java.util.*\n\npublic class Main(){\n    public static void main(String args[])\n\n}'
+    cppcode = '#include <iostream> \n#include <cstdio>\nusing namespace std;\nint main()\n{\n\n    return 0;\n}'
+    javacode = 'import java.util.*;\n\npublic class Main{\n    public static void main(String args[]){\n}\n}'
     
     suffix = '.c'
     if codetype == 'c':
@@ -187,7 +201,6 @@ def genCode(Pid,codetype):
     elif codetype == 'java':
         suffix = '.java'
         code = code + javacode
-        
     f = open("./"+ Pid+'_'+title+suffix, "w")
     f.write(code)
     f.flush()
@@ -197,6 +210,9 @@ def genCode(Pid,codetype):
 #提交代码
 def submitCode(fileName):
     Pid = fileName.split('_')[0]
+    if not re.match('\d+',Pid):
+        ShowMessage.error("文件命名错误，以'id_‘开头")
+        exit(0)
     f = open(fileName, "r")
     code = f.read()
     f.close()
@@ -207,11 +223,16 @@ def submitCode(fileName):
     score = jdata['score']
     time = jdata['time']
     #termcolor.colored(self.title, 'white')
-    print(result + '\n' + str(score) + '\n' + time)
-if __name__ == "__main__" :
-    is_login()
-#    submitCode("125_极差.cpp")
+    color = "red"
+    if result == "Answer Correct.":
+        color = "green"
     
+    print(termcolor.colored(result,color) + '\n' +"得分："+ termcolor.colored(str(score),color) + '\n' +"提交时间："+ termcolor.colored(time,color))
+
+
+#if __name__ == "__main__" :
+#    is_login()
+#    submitCode("125_极差.cpp")
 #    showProblemDetail('125')
 #    genCode('125','c++')
 #    showContestList(False)

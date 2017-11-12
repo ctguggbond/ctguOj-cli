@@ -16,7 +16,7 @@ class ShowMessage:
     @staticmethod
     def info(msg):
         if ShowMessage.flag:
-            print ("".join([termcolor.colored("INFO", "magenta"), ": ", termcolor.colored(msg, "white")]))
+            print (termcolor.colored(msg, "green"))
             
     @staticmethod
     def debug(msg):
