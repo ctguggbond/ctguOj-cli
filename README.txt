@@ -6,7 +6,7 @@ python大作业
 git clone https://git.ctguqmx.com/ggbond/ctguOj-cli.git
 cd ctguOj-cli 
 
-sudo ln -s ./ctguoj.py /usr/bin/ctguoj 或 mkdir ~/bin; ln -s ./ctguoj.py ~/bin/ctguoj
+sudo ln -s ./ctguoj.py /usr/bin/ctguoj 或 mkdir ~/bin; ln -s $(pwd)/ctguoj.py ~/bin/ctguoj
 
 
 
