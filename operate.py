@@ -189,7 +189,7 @@ def genCode(Pid,codetype):
     
     ccode = '#include <stdio.h>\nint main(){\n\n    return 0;\n}'
     cppcode = '#include <iostream> \n#include <cstdio>\nusing namespace std;\nint main()\n{\n\n    return 0;\n}'
-    javacode = 'import java.util.*;\n\npublic class Main{\n    public static void main(String args[]){\n}\n}'
+    javacode = 'import java.util.*;\n\npublic class Main{\n    public static void main(String args[])    {\n\n}\n}'
     
     suffix = '.c'
     if codetype == 'c':

@@ -5,10 +5,9 @@ python大作业
 例：
 git clone https://git.ctguqmx.com/ggbond/ctguOj-cli.git
 cd ctguOj-cli 
+sudo ln -s ./ctguoj.py /usr/bin/ctguoj 
 
-sudo ln -s ./ctguoj.py /usr/bin/ctguoj 或 mkdir ~/bin; ln -s $(pwd)/ctguoj.py ~/bin/ctguoj
-
-
+要使用还要解决后面一堆依赖库
 
 开始使用：
 ----------------------------------------------------------
@@ -44,7 +43,13 @@ lxml#开始用自带的htmlparser 死活找不全。。我还以为方法错了
 pillow  python3PIL图像处理库
 tesseract-ocr google的ocr识别引擎
 pytesseract Python-tesseract 是光学字符识别Tesseract OCR引擎的Python封装类(不知道是什么)
+
 leptonica-devel  编译tesseract-orc的时候需要这个函数库
+这几个图片库也要装上lepptonica 借用他们解析图片libgif libjpeg libpng libtiff zlib
+
+#############
+
+
 
 termcolor 终端颜色显示
 
