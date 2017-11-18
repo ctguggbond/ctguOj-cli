@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 import sys
 import os
 from operate import *
@@ -71,6 +71,7 @@ def help_commond():
             " ctguoj show id -g c     | 显示题目信息并生成c语言代码文件\n" \
             " ctguoj submit filename  | 提交代码文件判题\n" \
             " ctguoj show ranking     | 显示当前参加比赛对应的排名\n" \
+            " ctguoj login            | 登录\n" \
             " ctguoj help             | 显示此帮助信息\n" \
             "--------------------------------------------------\n"
     ShowMessage.info(info)
@@ -98,6 +99,8 @@ def main():
             submit_commond()
         elif arg1 == "help":
             help_commond()
+        elif arg1 == "login":
+            login()
         else :
             ShowMessage.error("参数错误")
             help_commond()
