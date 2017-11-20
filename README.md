@@ -4,13 +4,13 @@
 
 用了leetcode-cli感觉很丝滑，做一个ctguoj的命令行版，虽然用处不大...
 
-*克隆项目，在一个path目录中创建符号链接.
+- 克隆项目，在一个path目录中创建符号链接.
 例：
 >git clone https://git.ctguqmx.com/ggbond/ctguOj-cli.git
 >cd ctguOj-cli 
 >sudo ln -s ./ctguoj.py /usr/bin/ctguoj 
 
-*要使用还要解决后面一堆依赖库
+- 要使用还要解决后面一堆依赖库
 
 
 ***
@@ -34,31 +34,31 @@ ctguoj help显示更多帮助信息：
           ctguoj show id          | 显示id对应题目的详细信息" 
           ctguoj show id -g c     | 显示题目信息并生成c语言代码文件" 
           ctguoj submit filename  | 提交代码文件判题" 
-          ctguoj show ranking     | 显示当前参加比赛对应的排名" 
+          ctguoj show ranking     | 显示当前参加比赛对应的排名"
 	  ctguoj login            | 登录
           ctguoj help             | 显示此帮助信息" 
 
 ***
-#使用的库
+####使用的库
 
-*tesseract安装可以看 [www.ggbond.cc/编译安装tesseract]
+- tesseract安装可以看  [编译安装tesseract](http://www.ggbond.cc/编译安装tesseract )
 其他的用pip3 install 都能解决
 
-*requsts
-##html解析
-*bs4 
-*lxml#开始用自带的htmlparser 死活找不全。。我还以为方法错了
+- requsts
+####html解析
+- bs4 
+- lxml#开始用自带的htmlparser 死活找不全。。我还以为方法错了
 
-##验证码识别
-*pillow  python3PIL图像处理库
-*tesseract-ocr google的ocr识别引擎
-*pytesseract Python-tesseract 是光学字符识别Tesseract OCR引擎的Python封装类(不知道是什么)
+####验证码识别
+- pillow  python3PIL图像处理库
+- tesseract-ocr google的ocr识别引擎
+- pytesseract Python-tesseract 是光学字符识别Tesseract OCR引擎的Python封装类(不知道是什么)
 
-*leptonica-devel  编译tesseract-orc的时候需要这个函数库
+- leptonica-devel  编译tesseract-orc的时候需要这个函数库
 这几个图片库也要装上lepptonica 借用他们解析图片libgif libjpeg libpng libtiff zlib
 
 
-*termcolor 终端颜色显示
+- termcolor 终端颜色显示
 
 ***
 
