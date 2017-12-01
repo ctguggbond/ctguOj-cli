@@ -7,11 +7,10 @@
 - 克隆项目，在一个path目录中创建符号链接.
 例：
 
-```
-git clone https://github.com/ctguggbond/ctguOj-cli.git
+> git clone https://github.com/ctguggbond/ctguOj-cli.git
 cd ctguOj-cli 
 sudo ln -s ./ctguoj.py /usr/bin/ctguoj 
-```
+
 
 - 要使用还要解决后面一堆依赖库
 
@@ -28,18 +27,21 @@ ctguoj submit filename 提交代码文件判题
 ```
 
 - ctguoj help显示更多帮助信息：
-```
-          ctguoj list -c          | 列出所有正在进行的比赛" 
-          ctguoj use id           | 根据cid选择比赛" 
-          ctguoj list -p          | 列出当前比赛题目" 
-          ctguoj list -c -a       | 列出所有进行和已结束的比赛" 
-          ctguoj show id          | 显示id对应题目的详细信息" 
-          ctguoj show id -g c     | 显示题目信息并生成c语言代码文件" 
-          ctguoj submit filename  | 提交代码文件判题" 
-          ctguoj show ranking     | 显示当前参加比赛对应的排名"
-	  ctguoj login            | 登录"
-          ctguoj help             | 显示此帮助信息" 
 
+```
+          ctguoj list -c          | 列出所有正在进行的比赛
+          ctguoj use id           | 根据cid选择比赛
+          ctguoj list -p          | 列出当前比赛题目
+          ctguoj list -c -a       | 列出所有进行和已结束的比赛
+          ctguoj show id          | 显示id对应题目的详细信息
+          ctguoj show id -g c     | 显示题目信息并生成c语言代码文件
+          ctguoj submit filename  | 提交代码文件判题
+          ctguoj show ranking     | 显示当前参加比赛对应的排名
+	  ctguoj passed           | 显示已提交的题目列表
+          ctguoj passed id        | 显示已提交题目详细信息
+	  ctguoj login            | 登录
+          ctguoj help             | 显示此帮助信息
+```
 ***
 
 #### 使用的库

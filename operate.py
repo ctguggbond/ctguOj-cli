@@ -57,7 +57,7 @@ def showContestList(flag):
     resp = getContest()
     jdata = json.loads(resp.text)
     datalist = jdata.get('list')
-
+    
     for data in datalist:
         if data['status'] == 'running' or flag:
             c = Contest()
@@ -79,6 +79,7 @@ def getProblemInfo(Pid,flag):
     Ctype = contestInfo[1]
     
     resp = getProblem(Cid,Ctype)
+    #解析网页数据
     soup = BeautifulSoup(resp.text,"lxml")
     #仅获取题目和id
     if flag:
@@ -110,14 +111,21 @@ def getProblemInfo(Pid,flag):
         p.descr_output = contentDiv[7].pre.string
         p.ex_input = contentDiv[9].pre.string
         p.ex_output = contentDiv[11].pre.string
+        p.code = ''
         return p
 
 #显示题目摘要列表
 def listProblem():
     ShowMessage.info("正在加载题目列表...")
     pList = getProblemInfo('',True)
+    i = 1
+    
     for p in pList:
-        print(p.problemSimple())
+        print(p.problemSimple(),end='\t')
+        if i % 3 == 0:
+            print('')
+        i = i+1
+
 
 #显示题目详细信息
 def showProblemDetail(Pid):
@@ -217,7 +225,7 @@ def submitCode(fileName):
     code = f.read()
     f.close()
     resp = getSubResp(code,Pid,contestInfo[1])
-    {"id":"125","result":"Wrong Answer.","score":0,"time":"21:34:35"}
+    #{"id":"125","result":"Wrong Answer.","score":0,"time":"21:34:35"}
     jdata = json.loads(resp.text)
     result = jdata['result']
     score = jdata['score']
@@ -229,8 +237,58 @@ def submitCode(fileName):
     
     print(termcolor.colored(result,color) + '\n' +"得分："+ termcolor.colored(str(score),color) + '\n' +"提交时间："+ termcolor.colored(time,color))
 
+#显示已经通过题目
+def showPassed():
+    Cid = contestInfo[0]
+    resp = getPassed(Cid)
+    soup = BeautifulSoup(resp.text,"lxml")
+    titles = soup.find_all('div',class_='nav')
+    if not titles :
+        ShowMessage.error("你还没有通过此比赛的题目 :)")
+        exit(0)
+    p = Problem()
+    i = 1
+    for t in titles :
+        p.Pid = t.string.strip().split('.')[0]
+        p.title = t.string.strip().split('.')[1]
+        print(p.problemSimple(),end='\t')
+        if i%3 == 0:
+            print('')
+        i = i+1
 
+#显示已通过题目详细信息
+def showPassedDetail(Pid):
+    Cid = contestInfo[0]
+    resp = getPassed(Cid)
+    soup = BeautifulSoup(resp.text,"lxml")
+    p = soup.find('div',class_='nav',text=re.compile(r'.*'+Pid+'.*'))
+    infolist = ['title','content','descr_input','descr_output','ex_input','ex_output','code','score']
+    j = 0
+    problem = Problem()
+    problem.Pid = ''
+    problem.timeAndMem=''
+    for i in range(0,31):
+        s  = ''
+        if p.string is not None:
+            s = p.string
+        elif p.pre is not None:
+            s= p.pre.string
+        elif p.span is not None:
+            s = p.span.string
+        elif p.textarea is not None:
+            s = p.textarea.string
+        if s is not None and s.strip() != '':
+            setattr(problem,infolist[j],s.strip())
+            j = j + 1
+        p = p.next_sibling
+    try:
+        problem.code.index('输入描述')
+        print(termcolor.colored(problem.code,'yellow'))
+    except:
+        print(problem.problemDetail())
+    print(termcolor.colored(problem.score,'green'))
 #if __name__ == "__main__" :
+#    showPassed()
 #    is_login()
 #    submitCode("125_极差.cpp")
 #    showProblemDetail('125')

@@ -99,3 +99,9 @@ def getSubResp(code,Pid,Ctype):
     }
     resp = session.post(action,data=data, headers=headers)
     return resp
+
+#获取已通过题目信息
+def getPassed(Cid):
+    action = "http://192.168.9.210/acmctgu/Exam/ExamAction!paperInfo.action?id="+Cid
+    resp = session.get(action,headers=headers)
+    return resp
