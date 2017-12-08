@@ -8,16 +8,15 @@
 
 
 ## Install
-- 安装依赖库,克隆项目，创建符号链接.
+- 克隆项目,安装依赖库，创建符号链接.
 
 例：
 
 ```
-#安装依赖库
-pip3 install -r requirements.txt
-
 git clone https://github.com/ctguggbond/ctguOj-cli.git
 cd ctguOj-cli 
+#安装依赖库
+pip3 install -r requirements.txt
 sudo ln -s ./ctguoj.py /usr/bin/ctguoj 
 ```
 
@@ -51,7 +50,7 @@ ctguoj submit filename 提交代码文件判题
 
 ***
 
-## 外部依赖函数库
+## 外部依赖库
 - leptonica-devel  安装tesseract-orc的时候需要这个函数库
 还需要这几个图片库libgif libjpeg libpng libtiff zlib，lepptonica 借用他们解析图片
 
