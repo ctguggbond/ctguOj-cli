@@ -105,7 +105,6 @@ def main():
             show_commond()
         elif arg1 == "use":
             use_commond()
-            ShowMessage.info("设置比赛成功! 'ctguoj list -p' 显示题目列表\n")
         elif arg1 == "submit":
             submit_commond()
         elif arg1 == "help":

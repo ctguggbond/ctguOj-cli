@@ -44,11 +44,11 @@ def get_login_data():
     
 
 #登录
-def postLogin():
+def postLogin(un,pd):
     # print u'输入用户名'.decode('utf-8').encode('gbk')                                                                
     global username, password
-    username = input(termcolor.colored(u'输入用户名: ', 'cyan'))
-    password = input(termcolor.colored(u'输入密码: ', 'cyan'))
+    username = un
+    password = pd
     data = get_login_data()
     
     resp = session.post(login_url,data=data, headers=headers)
@@ -66,14 +66,17 @@ def getContest():
     return resp
 
 #获取题目
-def getProblem(Cid,Ctype):
+def getProblem(Cid,Ctype,Cpass):
     action="http://192.168.9.210/acmctgu/Exam/ExamAction!beginExam.action?id="+Cid+"&type="+Ctype
+    #如果需要密码
+    if Cpass == '1':
+        action = "http://192.168.9.210/acmctgu/Exam/ExamAction!pwbeginExam.action?id="+ Cid+ "&type="+Ctype
     resp = session.get(action)
     return resp
 
-#输入密码获取题目
-def getPasswordProblem(Pid,password):
-    action = "http://192.168.9.210/acmctgu/Paper/PaperAction!checkpw.action?password="+password+"&id="+Pid
+#请求带密码题目
+def postProblemPasswd(Cid,password):
+    action = "http://192.168.9.210/acmctgu/Paper/PaperAction!checkpw.action?password="+password+"&id="+Cid
     resp = session.get(action)
     return resp
 

@@ -7,12 +7,11 @@ from contest import Contest
 from problem import Problem
 from userInfo import UserInfo
 import re
+import getpass
 
-
-#先加载保存的数据#############
-#比赛id以及以及使用的语言信息
-
-contestInfo = ['185','0'] 
+#先加载保存的数据#########
+#第一个参数比赛id 第二个语言类型java或c  第三个参数是否需要密码
+contestInfo = ['185','0','0'] 
 
 try:
     with open('.contestInfo.json','r') as file_object:
@@ -20,7 +19,6 @@ try:
 except:
     pass
 
-############################
 
 
 #判断是否登录
@@ -36,21 +34,29 @@ def is_login():
     
 #登录
 def login():
-    resp = postLogin()
-    soup = BeautifulSoup(resp.text,"lxml")
-    divlist = soup.find_all('div',class_ = 'user')
-    
-    if len(divlist) > 3:
-        info = divlist[3].font.string
-        if info == "验证码有误":
-            info = "oooooops...验证码识别失败,try it again~"
-        ShowMessage.error(info)
+    username = input(termcolor.colored(u'输入用户名: ', 'cyan'))
+    password = getpass.getpass(termcolor.colored('输入密码： '))
 
-    else:
-        ShowMessage.success("登录成功！")
-        session.cookies.save(ignore_discard=True, ignore_expires=True)
-   
+    #验证码识别率较低..索性一次尝试5次
+    tryloginTime = 5
+    while(tryloginTime > 0):
+        resp = postLogin(username,password)
+        soup = BeautifulSoup(resp.text,"lxml")
+        divlist = soup.find_all('div',class_ = 'user')
         
+        if len(divlist) > 3:
+            info = divlist[3].font.string
+            if info != "验证码有误":
+                ShowMessage.error(info)
+                break
+        else:
+            ShowMessage.success("登录成功！")
+            session.cookies.save(ignore_discard=True, ignore_expires=True)
+            break;
+        tryloginTime = tryloginTime -1
+    if tryloginTime <= 0:
+        ShowMessage.error("oooooops...验证码识别失败,再试试?")
+
 #显示比赛列表flag位true 显示所有 flase仅显示正在进行的比赛
 #就只显示第一页，后面也没什么用
 def showContestList(flag):
@@ -74,15 +80,15 @@ def showContestList(flag):
                 '\t' + '结束时间' + '\t\t'+ '出题人'))
 
 #获取题目信息
-def getProblemInfo(Pid,flag):
+def getProblemInfo(Pid,isSimple):
     Cid = contestInfo[0] #比赛id
     Ctype = contestInfo[1]
-    
-    resp = getProblem(Cid,Ctype)
+    Cpass = contestInfo[2]
+    resp = getProblem(Cid,Ctype,Cpass)
     #解析网页数据
     soup = BeautifulSoup(resp.text,"lxml")
     #仅获取题目和id
-    if flag:
+    if isSimple:
         pList = []
         allProblemDiv = soup.find_all('div',id=re.compile(r'title_\d*'))
         if not allProblemDiv :
@@ -175,19 +181,38 @@ def saveContestInfo(Cid):
     jdata = json.loads(resp.text)
     datalist = jdata.get('list')
     
-    #没想到什么优雅的办法...就先再查找一边找到类型id
-    Ctype = '1'
+    Ctype = '1'  #类型
+    Cpass = '0'  #是否需要密码 0为不需要
+
+    #根据比赛id查找比赛类型
     for data in datalist:
         if str(data['id']) == Cid:
             Ctype = data['isjava']
+    #判断是否需要密码
+    needPasswordTest = getProblem(Cid,Ctype,'0')
+    soup = BeautifulSoup(needPasswordTest.text,'lxml')
+    tableInfo = soup.find('table')
 
-    info = [Cid,Ctype]
+    if 'Struts Problem Report' in soup.title:
+        ShowMessage.error('没有该比赛 -_-')
+        exit(0)
+
+    #输入密码表格宽度30% ,  题目表格宽度100% 这样查找貌似快点,有待优化
+    if tableInfo['width'] == '30%':
+        Cpass = '1'
+        passwd= input(termcolor.colored(u'你需要输入密码参加该比赛: ', 'green'))
+        passwdisRight = postProblemPasswd(Cid,passwd)
+        if passwdisRight.text == 'no':
+            ShowMessage.error('密码错误!')
+            exit(0)
+    info = [Cid,Ctype,Cpass]
     with open('.contestInfo.json','w') as file_object:
         json.dump(info,file_object)
-    
+    ShowMessage.info("设置比赛成功! 'list -p' 显示题目列表\n")
         
 #生成代码模板
 def genCode(Pid,codetype):
+    ShowMessage.info('代码文件生成中...')
     p = getProblemInfo(Pid,False)
 
     title = p.title.split('(')[0].strip()
@@ -197,7 +222,7 @@ def genCode(Pid,codetype):
     
     ccode = '#include <stdio.h>\nint main(){\n\n    return 0;\n}'
     cppcode = '#include <iostream> \n#include <cstdio>\nusing namespace std;\nint main()\n{\n\n    return 0;\n}'
-    javacode = 'import java.util.*;\n\npublic class Main{\n    public static void main(String args[])    {\n\n}\n}'
+    javacode = 'import java.util.*;\n\npublic class Main{\n    public static void main(String args[]){\n\n    }\n}'
     
     suffix = '.c'
     if codetype == 'c':
@@ -209,11 +234,12 @@ def genCode(Pid,codetype):
     elif codetype == 'java':
         suffix = '.java'
         code = code + javacode
-    f = open("./"+ Pid+'_'+title+suffix, "w")
+    fileName = Pid+'_' + title+suffix 
+    f = open("./"+ fileName, "w")
     f.write(code)
     f.flush()
     f.close()
-
+    ShowMessage.info('文件  [ '+ fileName+ ' ]  保存成功 :) ')
 
 #提交代码
 def submitCode(fileName):
