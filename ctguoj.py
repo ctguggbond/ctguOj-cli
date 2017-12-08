@@ -79,7 +79,7 @@ def help_commond():
             " ctguoj show id -g c     | 显示题目信息并生成c语言代码文件 可选参数c++ java\n" \
             " ctguoj submit filename  | 提交代码文件判题\n" \
             " ctguoj show ranking     | 显示当前参加比赛对应的排名\n" \
-            " ctguoj passed           | 显示已提交过的题目列表\n" \
+            " ctguoj passed           | 显示所有已提交过的题目列表\n" \
             " ctguoj passed id        | 显示已提交题目详细信息\n" \
             " ctguoj login            | 登录\n" \
             " ctguoj help             | 显示此帮助信息\n" \

@@ -263,7 +263,7 @@ def submitCode(fileName):
         if result == "Answer Correct.":
             color = "green"
             
-            print(termcolor.colored(result,color) + '\n' +"得分："+ termcolor.colored(str(score),color) + '\n' +"提交时间："+ termcolor.colored(time,color))
+        print(termcolor.colored(result,color) + '\n' +"得分："+ termcolor.colored(str(score),color) + '\n' +"提交时间："+ termcolor.colored(time,color))
     except:
         ShowMessage.error('提交错误，检查提交信息. *_*.')
 #显示已经通过题目

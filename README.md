@@ -1,7 +1,7 @@
 # python大作业
 
 用了leetcode-cli感觉很丝滑，做一个ctguoj的命令行版，虽然用处不大...
-
+用处：可以看提交过的代码.  通过老师服务器外网可以刷题.
 
 ## env
 - python3,centos7
@@ -10,7 +10,7 @@
 ## Install
 - 安装依赖库,克隆项目，创建符号链接.
 
-*例*：
+例：
 
 ```
 #安装依赖库
@@ -44,7 +44,7 @@ ctguoj submit filename 提交代码文件判题
           ctguoj submit filename  | 提交代码文件判题
           ctguoj show ranking     | 显示当前参加比赛对应的排名
 	  ctguoj passed           | 显示已提交的题目列表
-          ctguoj passed id        | 显示已提交题目详细信息
+          ctguoj passed id        | 显示所有已提交题目详细信息
 	  ctguoj login            | 登录
           ctguoj help             | 显示此帮助信息
 ```
