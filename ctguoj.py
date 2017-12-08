@@ -23,7 +23,7 @@ def list_commond():
 def use_commond():
     if arg_len == 3:
         arg2 = sys.argv[2]
-        if re.match('\d',arg2):
+        if re.match('^\d+$',arg2):
             saveContestInfo(arg2)
             return
     ShowMessage.error("参数错误")
@@ -32,7 +32,7 @@ def use_commond():
 def show_commond():
     if arg_len == 3:
         arg2 = sys.argv[2]
-        if re.match('\d+',arg2):
+        if re.match('^\d+$',arg2):
             showProblemDetail(arg2)
             return
         elif arg2 == "ranking" :
@@ -61,7 +61,7 @@ def passed():
     if arg_len == 2:
         showPassed()
         return
-    elif arg_len == 3 and re.match('\d+',sys.argv[2]):
+    elif arg_len == 3 and re.match('^\d+$',sys.argv[2]):
         showPassedDetail(sys.argv[2])
         return
     ShowMessage.error("参数错误")
