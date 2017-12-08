@@ -62,6 +62,7 @@ def login():
 def showContestList(flag):
     resp = getContest()
     jdata = json.loads(resp.text)
+    
     datalist = jdata.get('list')
     
     for data in datalist:
@@ -252,17 +253,19 @@ def submitCode(fileName):
     f.close()
     resp = getSubResp(code,Pid,contestInfo[1])
     #{"id":"125","result":"Wrong Answer.","score":0,"time":"21:34:35"}
-    jdata = json.loads(resp.text)
-    result = jdata['result']
-    score = jdata['score']
-    time = jdata['time']
-    #termcolor.colored(self.title, 'white')
-    color = "red"
-    if result == "Answer Correct.":
-        color = "green"
-    
-    print(termcolor.colored(result,color) + '\n' +"得分："+ termcolor.colored(str(score),color) + '\n' +"提交时间："+ termcolor.colored(time,color))
-
+    try:
+        jdata = json.loads(resp.text)
+        result = jdata['result']
+        score = jdata['score']
+        time = jdata['time']
+        #termcolor.colored(self.title, 'white')
+        color = "red"
+        if result == "Answer Correct.":
+            color = "green"
+            
+            print(termcolor.colored(result,color) + '\n' +"得分："+ termcolor.colored(str(score),color) + '\n' +"提交时间："+ termcolor.colored(time,color))
+    except:
+        ShowMessage.error('提交错误，检查提交信息. *_*.')
 #显示已经通过题目
 def showPassed():
     Cid = contestInfo[0]
@@ -288,6 +291,10 @@ def showPassedDetail(Pid):
     resp = getPassed(Cid)
     soup = BeautifulSoup(resp.text,"lxml")
     p = soup.find('div',class_='nav',text=re.compile(r'.*'+Pid+'.*'))
+
+    if not  p:
+        ShowMessage.error("没有该题目...")
+        exit(0)
     infolist = ['title','content','descr_input','descr_output','ex_input','ex_output','code','score']
     j = 0
     problem = Problem()
