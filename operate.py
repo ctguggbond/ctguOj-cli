@@ -6,6 +6,7 @@ from ShowMessage import ShowMessage
 from contest import Contest
 from problem import Problem
 from userInfo import UserInfo
+import sys
 import re
 import getpass
 
@@ -94,7 +95,7 @@ def getProblemInfo(Pid,isSimple):
         allProblemDiv = soup.find_all('div',id=re.compile(r'title_\d*'))
         if not allProblemDiv :
             ShowMessage.error("比赛不可参加,使用use id重新选择比赛")
-            exit(0)
+            sys.exit(0)
         for pdiv in allProblemDiv:
             p = Problem()
             p.Pid = re.sub("\D", "",pdiv['id'])
@@ -106,7 +107,7 @@ def getProblemInfo(Pid,isSimple):
         pdiv = soup.find('div',id='title_'+Pid)
         if not pdiv:
             ShowMessage.error("你已经做过了或者没有该题目")
-            exit(0)
+            sys.exit(0)
         p = Problem()
         p.Pid = re.sub("\D", "",pdiv['id'])
         p.title = pdiv.find('div',class_='nav').string.split('.')[1].strip()
@@ -132,7 +133,7 @@ def listProblem():
         if i % 3 == 0:
             print('')
         i = i+1
-
+    print('')
 
 #显示题目详细信息
 def showProblemDetail(Pid):
@@ -149,7 +150,7 @@ def getRankingList(Cid):
     rankingTr = soup.find_all('tr',id=re.compile('\d*'))
     if not  rankingTr:
         ShowMessage.error("没有该比赛排名...重新选择比赛")
-        exit(0)
+        sys.exit(0)
     
     rList = []
     for tr in rankingTr:
@@ -196,7 +197,7 @@ def saveContestInfo(Cid):
 
     if 'Struts Problem Report' in soup.title:
         ShowMessage.error('没有该比赛 -_-')
-        exit(0)
+        sys.exit(0)
 
     #输入密码表格宽度30% ,  题目表格宽度100% 这样查找貌似快点,有待优化
     if tableInfo['width'] == '30%':
@@ -205,7 +206,7 @@ def saveContestInfo(Cid):
         passwdisRight = postProblemPasswd(Cid,passwd)
         if passwdisRight.text == 'no':
             ShowMessage.error('密码错误!')
-            exit(0)
+            sys.exit(0)
     info = [Cid,Ctype,Cpass]
     with open('.contestInfo.json','w') as file_object:
         json.dump(info,file_object)
@@ -247,7 +248,7 @@ def submitCode(fileName):
     Pid = fileName.split('_')[0]
     if not re.match('\d+',Pid):
         ShowMessage.error("文件命名错误，以'id_‘开头")
-        exit(0)
+        sys.exit(0)
     f = open(fileName, "r")
     code = f.read()
     f.close()
@@ -274,7 +275,7 @@ def showPassed():
     titles = soup.find_all('div',class_='nav')
     if not titles :
         ShowMessage.error("你还没有通过此比赛的题目 :)")
-        exit(0)
+        sys.exit(0)
     p = Problem()
     i = 1
     for t in titles :
@@ -284,7 +285,7 @@ def showPassed():
         if i%3 == 0:
             print('')
         i = i+1
-
+    print('')
 #显示已通过题目详细信息
 def showPassedDetail(Pid):
     Cid = contestInfo[0]
@@ -294,7 +295,7 @@ def showPassedDetail(Pid):
 
     if not  p:
         ShowMessage.error("没有该题目...")
-        exit(0)
+        sys.exit(0)
     infolist = ['title','content','descr_input','descr_output','ex_input','ex_output','code','score']
     j = 0
     problem = Problem()
