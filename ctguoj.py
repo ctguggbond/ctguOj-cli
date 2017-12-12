@@ -71,18 +71,18 @@ def help_commond():
     info  = "\n" \
             "-----------------------help-----------------------" \
             "\n" \
-            " ctguoj list -c          | 列出所有正在进行的比赛\n" \
-            " ctguoj use id           | 根据id选择比赛\n" \
-            " ctguoj list -p          | 列出当前比赛题目\n" \
-            " ctguoj list -c -a       | 列出所有进行和已结束的比赛\n" \
-            " ctguoj show id          | 显示id对应题目的详细信息\n" \
-            " ctguoj show id -g c     | 显示题目信息并生成c语言代码文件 可选参数c++ java\n" \
-            " ctguoj submit filename  | 提交代码文件判题\n" \
-            " ctguoj show ranking     | 显示当前参加比赛对应的排名\n" \
-            " ctguoj passed           | 显示所有已提交过的题目列表\n" \
-            " ctguoj passed id        | 显示已提交题目详细信息\n" \
-            " ctguoj login            | 登录\n" \
-            " ctguoj help             | 显示此帮助信息\n" \
+            " list -c          | 列出所有正在进行的比赛\n" \
+            " use id           | 根据id选择比赛\n" \
+            " list -p          | 列出当前比赛题目\n" \
+            " list -c -a       | 列出所有进行和已结束的比赛\n" \
+            " show id          | 显示id对应题目的详细信息\n" \
+            " show id -g c     | 显示题目信息并生成c语言代码文件 可选参数c++ java\n" \
+            " submit filename  | 提交代码文件判题\n" \
+            " show ranking     | 显示当前参加比赛对应的排名\n" \
+            " passed           | 显示所有已提交过的题目列表\n" \
+            " passed id        | 显示已提交题目详细信息\n" \
+            " login            | 登录\n" \
+            " help             | 显示此帮助信息\n" \
             "--------------------------------------------------\n"
     ShowMessage.info(info)
     

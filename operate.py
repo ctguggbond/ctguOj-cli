@@ -22,16 +22,16 @@ except:
 
 
 
-#判断是否登录
+#判断是否登录 
 def is_login():
     resp = getInfo()
     soup = BeautifulSoup(resp.text,"lxml")
-    islogin = soup.find_all(text='用户名')
-
-    if islogin :
-        return True
-    else :
-        return False
+#    islogin = soup.find_all(text='用户名')
+    if 'Struts Problem Report' in soup.title:
+        return false;
+    return True
+#    else :
+#        return False
     
 #登录
 def login():
@@ -56,7 +56,7 @@ def login():
             break;
         tryloginTime = tryloginTime -1
     if tryloginTime <= 0:
-        ShowMessage.error("oooooops...验证码识别失败,再试试?")
+        ShowMessage.error("oooops...验证码识别失败,再试试?")
 
 #显示比赛列表flag位true 显示所有 flase仅显示正在进行的比赛
 #就只显示第一页，后面也没什么用
@@ -94,7 +94,7 @@ def getProblemInfo(Pid,isSimple):
         pList = []
         allProblemDiv = soup.find_all('div',id=re.compile(r'title_\d*'))
         if not allProblemDiv :
-            ShowMessage.error("比赛不可参加,使用use id重新选择比赛")
+            ShowMessage.warn("题目空了，你可能已经AK了.")
             sys.exit(0)
         for pdiv in allProblemDiv:
             p = Problem()
@@ -193,13 +193,13 @@ def saveContestInfo(Cid):
     #判断是否需要密码
     needPasswordTest = getProblem(Cid,Ctype,'0')
     soup = BeautifulSoup(needPasswordTest.text,'lxml')
-    tableInfo = soup.find('table')
 
     if 'Struts Problem Report' in soup.title:
         ShowMessage.error('没有该比赛 -_-')
         sys.exit(0)
 
-    #输入密码表格宽度30% ,  题目表格宽度100% 这样查找貌似快点,有待优化
+    tableInfo = soup.table
+    #输入密码表格宽度30% ,  题目表格宽度100% 
     if tableInfo['width'] == '30%':
         Cpass = '1'
         passwd= input(termcolor.colored(u'你需要输入密码参加该比赛: ', 'green'))
@@ -249,7 +249,11 @@ def submitCode(fileName):
     if not re.match('\d+',Pid):
         ShowMessage.error("文件命名错误，以'id_‘开头")
         sys.exit(0)
-    f = open(fileName, "r")
+    try:
+        f = open(fileName, "r")
+    except:
+        ShowMessage.error("没有找到文件.检查文件名是否有误")
+        sys.exit(0)
     code = f.read()
     f.close()
     resp = getSubResp(code,Pid,contestInfo[1])
@@ -266,7 +270,7 @@ def submitCode(fileName):
             
         print(termcolor.colored(result,color) + '\n' +"得分："+ termcolor.colored(str(score),color) + '\n' +"提交时间："+ termcolor.colored(time,color))
     except:
-        ShowMessage.error('提交错误，检查提交信息. *_*.')
+        ShowMessage.error('提交错误，比赛已经结束. *_*.')
 #显示已经通过题目
 def showPassed():
     Cid = contestInfo[0]
