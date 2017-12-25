@@ -26,12 +26,11 @@ except:
 def is_login():
     resp = getInfo()
     soup = BeautifulSoup(resp.text,"lxml")
-#    islogin = soup.find_all(text='用户名')
-    if 'Struts Problem Report' in soup.title:
-        return false;
-    return True
-#    else :
-#        return False
+    islogin = soup.find_all(text='用户名')
+    if islogin:
+        return True;
+    else :
+        return False
     
 #登录
 def login():
