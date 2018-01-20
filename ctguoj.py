@@ -71,28 +71,46 @@ def help_commond():
     info  = "\n" \
             "-----------------------help-----------------------" \
             "\n" \
-            " list -c          | 列出所有正在进行的比赛\n" \
-            " use id           | 根据id选择比赛\n" \
-            " list -p          | 列出当前比赛题目\n" \
-            " list -c -a       | 列出所有进行和已结束的比赛\n" \
-            " show id          | 显示id对应题目的详细信息\n" \
-            " show id -g c     | 显示题目信息并生成c语言代码文件 可选参数c++ java\n" \
-            " submit filename  | 提交代码文件判题\n" \
-            " show ranking     | 显示当前参加比赛对应的排名\n" \
-            " passed           | 显示所有已提交过的题目列表\n" \
-            " passed id        | 显示已提交题目详细信息\n" \
-            " login            | 登录\n" \
-            " help             | 显示此帮助信息\n" \
+            " coj list -c          | 列出所有正在进行的比赛\n" \
+            " coj use id           | 根据id选择比赛\n" \
+            " coj list -p          | 列出当前比赛题目\n" \
+            " coj list -c -a       | 列出所有进行和已结束的比赛\n" \
+            " coj show id          | 显示id对应题目的详细信息\n" \
+            " coj show id -g c     | 显示题目信息并生成c语言代码文件 可选参数c++ java\n" \
+            " coj submit filename  | 提交代码文件判题\n" \
+            " coj show ranking     | 显示当前参加比赛对应的排名\n" \
+            " coj passed           | 显示所有已提交过的题目列表\n" \
+            " coj passed id        | 显示已提交题目详细信息\n" \
+            " coj login            | 登录\n" \
+            " coj help             | 显示更多帮助信息\n" \
+            "\n" \
             "--------------------------------------------------\n"
     ShowMessage.info(info)
     
 def main():
-    if not os.path.exists(".cookies"):
-        ShowMessage.error("登录失效，请先登录.")
-        login()
+    #判断是否登录
+    if not os.path.exists(basePath + "cookies"):
+        ShowMessage.info("欢迎使用,登录后享受丝滑刷题")
+        login(False,'','')
+        help_commond()
     elif not is_login():
-        ShowMessage.error("登录失效，请先登录.")
-        login()
+        #验证用户是否已经保存密码
+        try:
+            username = conf.get('user','username')
+            encodePassword = conf.get('user','password')
+            #解码
+            password = base64.b64decode(encodePassword.encode('utf-8')).decode('utf-8')
+            if username == '' or password == '':
+                login(False,'','')
+            else:
+                ShowMessage.info('登录失效，正在尝试重新登录...')
+                login(True,username,password)
+        except KeyboardInterrupt:
+            pass
+        except:
+            ShowMessage.error("登录失效，请重新登录.")
+            login(False,'','')
+
     else:
         if arg_len < 2:
             ShowMessage.error("参数错误")
@@ -109,8 +127,10 @@ def main():
             submit_commond()
         elif arg1 == "help":
             help_commond()
+            ShowMessage.info(" 更多信息: https://github.com/ctguggbond/ctguOj-cli")
+            ShowMessage.info(" 反馈交流群: 681496606")
         elif arg1 == "login":
-            login()
+            login(False,'','')
         elif arg1 == "passed":
             passed();
         else :
@@ -118,4 +138,10 @@ def main():
             help_commond()
             
 if __name__ == '__main__':
-    main()
+    #初始化
+    initCoj()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n操作取消")
+

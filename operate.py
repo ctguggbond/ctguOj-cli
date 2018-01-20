@@ -9,19 +9,37 @@ from userInfo import UserInfo
 import sys
 import re
 import getpass
+import configparser
+import base64
 
-#先加载保存的数据#########
-#第一个参数比赛id 第二个语言类型java或c  第三个参数是否需要密码
-contestInfo = ['185','0','0'] 
-
-try:
-    with open('.contestInfo.json','r') as file_object:
-        contestInfo = json.load(file_object)
-except:
-    pass
+#文件保存基础路径
+basePath = os.environ['HOME'] + '/.ctguoj/'
+#配置初始化
+conf = configparser.ConfigParser()
 
 
+#contestInfo = ['185','0','0']
+#try:
+#    with open(basePath + 'contestInfo.json','r') as file_object:
+#        contestInfo = json.load(file_object)
+#except:
+#     pass
 
+#初始化
+def initCoj():
+    if not os.path.exists(basePath):
+        os.mkdir(basePath)
+    if not os.path.exists(basePath + "ctguoj.conf"):
+        #初始化配置信息
+        conf.add_section('contest')
+        conf.add_section('user')
+        conf.set('contest', 'cid', '185') #设置比赛id
+        conf.set('contest', 'ctype', '0') #设置比赛类型 1为java 0为cpp
+        conf.set('contest', 'cpass', '0') #设置比赛是否需要密码 0为当前比赛不需要密码
+        with open(basePath + 'ctguoj.conf', 'w') as fw:
+            conf.write(fw)
+    conf.read(basePath+'ctguoj.conf')
+        
 #判断是否登录 
 def is_login():
     resp = getInfo()
@@ -31,13 +49,14 @@ def is_login():
         return True;
     else :
         return False
-    
-#登录
-def login():
-    username = input(termcolor.colored(u'输入用户名: ', 'cyan'))
-    password = getpass.getpass(termcolor.colored('输入密码： '))
 
-    #验证码识别率较低..索性一次尝试5次
+#登录
+def login(isauto,username,password):
+    if not isauto:
+        username = input(termcolor.colored('请输入用户名: ', 'cyan'))
+        password = getpass.getpass(termcolor.colored('请输入密码： ','cyan'))
+
+    #验证码识别率较低..索性尝试5次
     tryloginTime = 5
     while(tryloginTime > 0):
         resp = postLogin(username,password)
@@ -47,18 +66,40 @@ def login():
         if len(divlist) > 3:
             info = divlist[3].font.string
             if info != "验证码有误":
+                conf.set('user', 'password', '')
+                with open(basePath + 'ctguoj.conf', 'w') as fw:
+                    conf.write(fw)
                 ShowMessage.error(info)
+                if isauto:
+                    ShowMessage.info('请使用\'coj login\'手动登录')
                 break
         else:
             ShowMessage.success("登录成功！")
             session.cookies.save(ignore_discard=True, ignore_expires=True)
-            break;
+            #如果是手动登录成功保存密码
+            if not isauto:
+                option = input(termcolor.colored(u'\n是否保存用户名及密码？ (yes/no) ', 'cyan'))
+                if option == 'yes':
+                    #保存密码
+                    try:
+                        conf.set('user', 'username', username)
+                        #简单base64编码加密意思意思...
+                        bytesString = password.encode(encoding="utf-8")
+                        encodestr = base64.b64encode(bytesString)
+                        conf.set('user', 'password', encodestr.decode(encoding='utf-8'))
+                        with open(basePath + 'ctguoj.conf', 'w') as fw:
+                            conf.write(fw)
+                            ShowMessage.success('保存密码成功  :)')
+                    except:
+                        ShowMessage.error('保存密码出了点问题...不妨碍继续使用')
+            break 
         tryloginTime = tryloginTime -1
     if tryloginTime <= 0:
         ShowMessage.error("oooops...验证码识别失败,再试试?")
+ 
 
 #显示比赛列表flag位true 显示所有 flase仅显示正在进行的比赛
-#就只显示第一页，后面也没什么用
+#只显示第一页，后面感觉也没什么用
 def showContestList(flag):
     resp = getContest()
     jdata = json.loads(resp.text)
@@ -82,9 +123,9 @@ def showContestList(flag):
 
 #获取题目信息
 def getProblemInfo(Pid,isSimple):
-    Cid = contestInfo[0] #比赛id
-    Ctype = contestInfo[1]
-    Cpass = contestInfo[2]
+    Cid = conf.get('contest','cid') #比赛id
+    Ctype = conf.get('contest','ctype')
+    Cpass = conf.get('contest','cpass')
     resp = getProblem(Cid,Ctype,Cpass)
     #解析网页数据
     soup = BeautifulSoup(resp.text,"lxml")
@@ -168,7 +209,7 @@ def getRankingList(Cid):
 
 #显示排名
 def showRanking():
-    Cid = contestInfo[0]
+    Cid = conf.get('contest','cid')
     ShowMessage.info("加载排名中...")
     rList = getRankingList(Cid)
     #    rList = rList.reverse()
@@ -206,10 +247,14 @@ def saveContestInfo(Cid):
         if passwdisRight.text == 'no':
             ShowMessage.error('密码错误!')
             sys.exit(0)
-    info = [Cid,Ctype,Cpass]
-    with open('.contestInfo.json','w') as file_object:
-        json.dump(info,file_object)
-    ShowMessage.info("设置比赛成功! 'list -p' 显示题目列表\n")
+
+    #保存比赛信息
+    conf.set('contest','cid',Cid)
+    conf.set('contest','ctype',Ctype)
+    conf.set('contest','cpass',Cpass)
+    with open(basePath + 'ctguoj.conf', 'w') as fw:
+        conf.write(fw)    
+    ShowMessage.info("设置比赛成功! 'coj list -p' 显示题目列表\n")
         
 #生成代码模板
 def genCode(Pid,codetype):
@@ -218,12 +263,12 @@ def genCode(Pid,codetype):
 
     title = p.title.split('(')[0].strip()
 
-    code = '/*' + p.problemContent() + '*/\n\n'
+    code = '/*' + p.problemContent() + '\n*/\n\n'
     code = re.sub(r'\r','',code)
     
     ccode = '#include <stdio.h>\nint main(){\n\n    return 0;\n}'
     cppcode = '#include <iostream> \n#include <cstdio>\nusing namespace std;\nint main()\n{\n\n    return 0;\n}'
-    javacode = 'import java.util.*;\n\npublic class Main{\n    public static void main(String args[]){\n\n    }\n}'
+    javacode= 'import java.util.*;\n\npublic class Main{\n    public static void main(String args[]){\n\n    }\n}'
     
     suffix = '.c'
     if codetype == 'c':
@@ -235,7 +280,7 @@ def genCode(Pid,codetype):
     elif codetype == 'java':
         suffix = '.java'
         code = code + javacode
-    fileName = Pid+'_' + title+suffix 
+    fileName = Pid+'.' + title+suffix 
     f = open("./"+ fileName, "w")
     f.write(code)
     f.flush()
@@ -244,9 +289,9 @@ def genCode(Pid,codetype):
 
 #提交代码
 def submitCode(fileName):
-    Pid = fileName.split('_')[0]
-    if not re.match('\d+',Pid):
-        ShowMessage.error("文件命名错误，以'id_‘开头")
+    Pid = fileName.split('.')[0]
+    if not re.match('^\d+$',Pid):
+        ShowMessage.error("文件命名错误，请以'id.'开头， 例: 70.简单求和.c")
         sys.exit(0)
     try:
         f = open(fileName, "r")
@@ -255,24 +300,24 @@ def submitCode(fileName):
         sys.exit(0)
     code = f.read()
     f.close()
-    resp = getSubResp(code,Pid,contestInfo[1])
+    resp = getSubResp(code,Pid,conf.get('contest','cid'))
     #{"id":"125","result":"Wrong Answer.","score":0,"time":"21:34:35"}
     try:
         jdata = json.loads(resp.text)
         result = jdata['result']
         score = jdata['score']
         time = jdata['time']
-        #termcolor.colored(self.title, 'white')
         color = "red"
         if result == "Answer Correct.":
             color = "green"
             
         print(termcolor.colored(result,color) + '\n' +"得分："+ termcolor.colored(str(score),color) + '\n' +"提交时间："+ termcolor.colored(time,color))
     except:
-        ShowMessage.error('提交错误，比赛已经结束. *_*.')
+        ShowMessage.error('提交错误，请重新提交. *_*.')
+
 #显示已经通过题目
 def showPassed():
-    Cid = contestInfo[0]
+    Cid = conf.get('contest','cid')
     resp = getPassed(Cid)
     soup = BeautifulSoup(resp.text,"lxml")
     titles = soup.find_all('div',class_='nav')
@@ -289,9 +334,10 @@ def showPassed():
             print('')
         i = i+1
     print('')
+
 #显示已通过题目详细信息
 def showPassedDetail(Pid):
-    Cid = contestInfo[0]
+    Cid = conf.get('contest','cid')
     resp = getPassed(Cid)
     soup = BeautifulSoup(resp.text,"lxml")
     p = soup.find('div',class_='nav',text=re.compile(r'.*'+Pid+'.*'))
