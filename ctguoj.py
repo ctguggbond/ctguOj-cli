@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import sys
-import os
 from operate import *
 
 arg_len = len(sys.argv)
@@ -74,14 +72,9 @@ def help_commond():
             " coj list -c          | 列出所有正在进行的比赛\n" \
             " coj use id           | 根据id选择比赛\n" \
             " coj list -p          | 列出当前比赛题目\n" \
-            " coj list -c -a       | 列出所有进行和已结束的比赛\n" \
             " coj show id          | 显示id对应题目的详细信息\n" \
             " coj show id -g c     | 显示题目信息并生成c语言代码文件 可选参数c++ java\n" \
             " coj submit filename  | 提交代码文件判题\n" \
-            " coj show ranking     | 显示当前参加比赛对应的排名\n" \
-            " coj passed           | 显示所有已提交过的题目列表\n" \
-            " coj passed id        | 显示已提交题目详细信息\n" \
-            " coj login            | 登录\n" \
             " coj help             | 显示更多帮助信息\n" \
             "\n" \
             "--------------------------------------------------\n"
@@ -89,10 +82,13 @@ def help_commond():
     
 def main():
     #判断是否登录
-    if not os.path.exists(basePath + "cookies"):
-        ShowMessage.info("欢迎使用,登录后享受丝滑刷题")
+    if arg_len >= 2 and sys.argv[1] == "login":
         login(False,'','')
+        sys.exit(0)
+    if not os.path.exists(basePath + ".cookies"):
+        ShowMessage.info("欢迎使用,登录后享受丝滑刷题")
         help_commond()
+        ShowMessage.info("使用\'coj login\'登录")
     elif not is_login():
         #验证用户是否已经保存密码
         try:
@@ -126,11 +122,23 @@ def main():
         elif arg1 == "submit":
             submit_commond()
         elif arg1 == "help":
-            help_commond()
-            ShowMessage.info(" 更多信息: https://github.com/ctguggbond/ctguOj-cli")
-            ShowMessage.info(" 反馈交流群: 681496606")
-        elif arg1 == "login":
-            login(False,'','')
+            info  = "\n" \
+            " coj list -c          | 列出所有正在进行的比赛\n" \
+            " coj use id           | 根据id选择比赛\n" \
+            " coj list -p          | 列出当前比赛题目\n" \
+            " coj show id          | 显示id对应题目的详细信息\n" \
+            " coj show id -g c     | 显示题目信息并生成c语言代码文件 可选参数c++ java\n" \
+            " coj submit filename  | 提交代码文件判题\n" \
+            " coj show ranking     | 显示当前参加比赛对应的排名\n" \
+            " coj list -c -a       | 列出所有进行和已结束的比赛\n" \
+            " coj passed           | 显示所有已提交过的题目列表\n" \
+            " coj passed id        | 显示已提交题目详细信息\n" \
+            " coj login            | 登录\n" \
+            "\n" \
+            "--------------------------------------------------\n"
+            " 更多信息: https://github.com/ctguggbond/ctguOj-cli\n" \
+            " 反馈交流群: 681496606\n"
+            ShowMessage.info(info)
         elif arg1 == "passed":
             passed();
         else :

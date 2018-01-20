@@ -4,6 +4,7 @@ from PIL import Image
 from io import BytesIO
 import termcolor
 from http import cookiejar
+import os
 
 headers={
     "Host": "192.168.9.210",
@@ -13,19 +14,16 @@ headers={
 
 session = requests.session()
 login_url = 'http://192.168.9.210/acmctgu/UserAction!login.action'
-session.cookies = cookiejar.LWPCookieJar(".cookies")
+session.cookies = cookiejar.LWPCookieJar(os.environ['HOME'] + '/.ctguoj/' + ".cookies")
 
 try:
     session.cookies.load(ignore_discard=True, ignore_expires=True)
 except:
     pass
     
-username=''
-password=''
-
 
 # 获取登录参数                                                                                                         
-def get_login_data():
+def get_login_data(username,password):
     #获取验证码
     #html = requests.get('http://192.168.9.210/acmctgu/UserAction!captcha.action')
     #with open('vcode.jpeg', 'wb') as file:
@@ -45,11 +43,8 @@ def get_login_data():
 
 #登录
 def postLogin(un,pd):
-    # print u'输入用户名'.decode('utf-8').encode('gbk')                                                                
-    global username, password
-    username = un
-    password = pd
-    data = get_login_data()
+    # print u'输入用户名'.decode('utf-8').encode('gbk')                                                            
+    data = get_login_data(un,pd)
     
     resp = session.post(login_url,data=data, headers=headers)
     return resp

@@ -1,4 +1,3 @@
-import os
 from api import *
 import json
 from bs4 import BeautifulSoup
@@ -18,13 +17,6 @@ basePath = os.environ['HOME'] + '/.ctguoj/'
 conf = configparser.ConfigParser()
 
 
-#contestInfo = ['185','0','0']
-#try:
-#    with open(basePath + 'contestInfo.json','r') as file_object:
-#        contestInfo = json.load(file_object)
-#except:
-#     pass
-
 #初始化
 def initCoj():
     if not os.path.exists(basePath):
@@ -34,7 +26,7 @@ def initCoj():
         conf.add_section('contest')
         conf.add_section('user')
         conf.set('contest', 'cid', '185') #设置比赛id
-        conf.set('contest', 'ctype', '0') #设置比赛类型 1为java 0为cpp
+        conf.set('contest', 'ctype', '1') #设置比赛类型 0为java 1为cpp
         conf.set('contest', 'cpass', '0') #设置比赛是否需要密码 0为当前比赛不需要密码
         with open(basePath + 'ctguoj.conf', 'w') as fw:
             conf.write(fw)
@@ -89,14 +81,13 @@ def login(isauto,username,password):
                         conf.set('user', 'password', encodestr.decode(encoding='utf-8'))
                         with open(basePath + 'ctguoj.conf', 'w') as fw:
                             conf.write(fw)
-                            ShowMessage.success('保存密码成功  :)')
+                        ShowMessage.success('保存密码成功  :)')
                     except:
-                        ShowMessage.error('保存密码出了点问题...不妨碍继续使用')
-            break 
+                        pass
+            break
         tryloginTime = tryloginTime -1
     if tryloginTime <= 0:
         ShowMessage.error("oooops...验证码识别失败,再试试?")
- 
 
 #显示比赛列表flag位true 显示所有 flase仅显示正在进行的比赛
 #只显示第一页，后面感觉也没什么用
@@ -118,7 +109,7 @@ def showContestList(flag):
             c.endTime = data['endtime']
             c.teacherName = data['teachername']
             c.problemDetail()
-    print(''.join('id' + '\t' + '{:35}'.format('名称') + '语言' +
+    print(''.join(' id' + '\t' + '{:35}'.format('名称') + '语言' +
                 '\t' + '结束时间' + '\t\t'+ '出题人'))
 
 #获取题目信息
@@ -139,14 +130,19 @@ def getProblemInfo(Pid,isSimple):
         for pdiv in allProblemDiv:
             p = Problem()
             p.Pid = re.sub("\D", "",pdiv['id'])
-            p.title = pdiv.find('div',class_='nav').string.split('.')[1].strip()
+            title = pdiv.find('div',class_='nav').string.split('.')[1].strip()
+            tempStrs = title.split('(')
+            p.score = int(re.sub("\D", "",tempStrs[len(tempStrs)-1]))
+            p.title = title.split('(')[0].strip()
             pList.append(p)
+        #按分数排序
+        pList = sorted(pList,key=lambda pList:pList.score)  
         return pList
     #获取详细题目信息
     else :
         pdiv = soup.find('div',id='title_'+Pid)
         if not pdiv:
-            ShowMessage.error("你已经做过了或者没有该题目")
+            ShowMessage.error("你已经AC了或者没有该题目")
             sys.exit(0)
         p = Problem()
         p.Pid = re.sub("\D", "",pdiv['id'])
@@ -165,15 +161,28 @@ def getProblemInfo(Pid,isSimple):
 #显示题目摘要列表
 def listProblem():
     ShowMessage.info("正在加载题目列表...")
-    pList = getProblemInfo('',True)
+
+    # 先尝试从缓存的文件中加载
+    pList = []
     i = 1
-    
-    for p in pList:
-        print(p.problemSimple(),end='\t')
-        if i % 3 == 0:
-            print('')
-        i = i+1
-    print('')
+    try:
+        with open(basePath + 'problemList.json','r') as file_object:
+            pList = json.load(file_object)
+        for p in pList:
+            print(p,end=' ')
+            if i % 3 == 0:
+                print('')
+            i = i+1
+        print('')
+    except:
+        #出错就从oj加载
+        pList = getProblemInfo('',True)
+        for p in pList:
+            print(p.problemSimple(),end=' ')
+            if i % 3 == 0:
+                print('')
+            i = i+1
+        print('')
 
 #显示题目详细信息
 def showProblemDetail(Pid):
@@ -217,36 +226,52 @@ def showRanking():
     for i in range(0, len(rList))[::-1]:
         rList[i].showUserInfo()
 
-#将当前选择的比赛id 及类型保存至文件,方便提交代码，不用选择提交类型，以及再次开始直接开始上次的位置
+#保存题目列表信息，不用每次请求
+def saveProblemList():
+    ShowMessage.info('正在缓存题目信息...')
+    pList = getProblemInfo('',True)
+    titleList = []
+    for p in pList:
+        titleList.append(p.problemSimple())
+    try:
+        with open(basePath + 'problemList.json','w') as file_object:
+            json.dump(titleList ,file_object)
+    except:
+        pass
+
+#将当前选择的比赛id 及类型保存至配置文件,方便提交代码，不用选择提交类型
 def saveContestInfo(Cid):
+    ShowMessage.info('正在获取比赛信息...')
     resp = getContest()
     jdata = json.loads(resp.text)
     datalist = jdata.get('list')
     
-    Ctype = '1'  #类型
+    Ctype = '1'  #类型 ...1代表c 0表示java
     Cpass = '0'  #是否需要密码 0为不需要
 
     #根据比赛id查找比赛类型
     for data in datalist:
         if str(data['id']) == Cid:
             Ctype = data['isjava']
+            break
     #判断是否需要密码
     needPasswordTest = getProblem(Cid,Ctype,'0')
-    soup = BeautifulSoup(needPasswordTest.text,'lxml')
 
-    if 'Struts Problem Report' in soup.title:
-        ShowMessage.error('没有该比赛 -_-')
+    #Struts Problem Report页面报错编码不是utf-8 
+    if 'ISO-8859-1' in needPasswordTest.encoding:
+        ShowMessage.error('没有该比赛 -_-\"')
         sys.exit(0)
-
-    tableInfo = soup.table
-    #输入密码表格宽度30% ,  题目表格宽度100% 
-    if tableInfo['width'] == '30%':
+    try:
+        #如果不需要密码就没有这个头信息会抛异常，比之前的解析内容判断速度快，虽然不雅
+        hasKeyContentLength = needPasswordTest.headers['Content-Length']
         Cpass = '1'
         passwd= input(termcolor.colored(u'你需要输入密码参加该比赛: ', 'green'))
         passwdisRight = postProblemPasswd(Cid,passwd)
         if passwdisRight.text == 'no':
             ShowMessage.error('密码错误!')
             sys.exit(0)
+    except:
+        pass
 
     #保存比赛信息
     conf.set('contest','cid',Cid)
@@ -254,6 +279,7 @@ def saveContestInfo(Cid):
     conf.set('contest','cpass',Cpass)
     with open(basePath + 'ctguoj.conf', 'w') as fw:
         conf.write(fw)    
+    saveProblemList()
     ShowMessage.info("设置比赛成功! 'coj list -p' 显示题目列表\n")
         
 #生成代码模板
@@ -266,8 +292,8 @@ def genCode(Pid,codetype):
     code = '/*' + p.problemContent() + '\n*/\n\n'
     code = re.sub(r'\r','',code)
     
-    ccode = '#include <stdio.h>\nint main(){\n\n    return 0;\n}'
-    cppcode = '#include <iostream> \n#include <cstdio>\nusing namespace std;\nint main()\n{\n\n    return 0;\n}'
+    ccode = '#include <stdio.h>\n\nint main(){\n\n    return 0;\n}'
+    cppcode = '#include <iostream> \n\n#include <cstdio>\nusing namespace std;\nint main()\n{\n\n    return 0;\n}'
     javacode= 'import java.util.*;\n\npublic class Main{\n    public static void main(String args[]){\n\n    }\n}'
     
     suffix = '.c'
@@ -300,7 +326,7 @@ def submitCode(fileName):
         sys.exit(0)
     code = f.read()
     f.close()
-    resp = getSubResp(code,Pid,conf.get('contest','cid'))
+    resp = getSubResp(code,Pid,conf.get('contest','ctype'))
     #{"id":"125","result":"Wrong Answer.","score":0,"time":"21:34:35"}
     try:
         jdata = json.loads(resp.text)
@@ -313,7 +339,7 @@ def submitCode(fileName):
             
         print(termcolor.colored(result,color) + '\n' +"得分："+ termcolor.colored(str(score),color) + '\n' +"提交时间："+ termcolor.colored(time,color))
     except:
-        ShowMessage.error('提交错误，请重新提交. *_*.')
+        ShowMessage.error('oops!提交出错了，请重新提交. *_*.')
 
 #显示已经通过题目
 def showPassed():
@@ -322,13 +348,16 @@ def showPassed():
     soup = BeautifulSoup(resp.text,"lxml")
     titles = soup.find_all('div',class_='nav')
     if not titles :
-        ShowMessage.error("你还没有通过此比赛的题目 :)")
+        ShowMessage.error("你还没有做过此比赛的题目 :)")
         sys.exit(0)
     p = Problem()
     i = 1
     for t in titles :
+        title = t.string.strip().split('.')[1]
+        tempStrs = title.split('(')
+        p.score = int(re.sub("\D", "",tempStrs[len(tempStrs)-1]))
+        p.title = title.split('(')[0].strip()
         p.Pid = t.string.strip().split('.')[0]
-        p.title = t.string.strip().split('.')[1]
         print(p.problemSimple(),end='\t')
         if i%3 == 0:
             print('')

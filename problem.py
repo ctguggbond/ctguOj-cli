@@ -26,9 +26,14 @@ class Problem:
     def problemSimple(self):
         Pid = termcolor.colored(self.Pid, 'magenta')
         title = termcolor.colored(self.title, 'white')
-        simpleInfo = ''.join('[' + Pid + ']' + '-' + title)
-        return '{:<{l}}'.format(simpleInfo,l= 30-len(title.encode('GBK'))+len(simpleInfo)) 
-        
+        pidAndtitle = ''.join('[' + Pid + ']' + '-' + title)
+        formattitle = '{:<{l}}'.format(pidAndtitle,l= 42-len(pidAndtitle.encode('GBK'))+len(pidAndtitle)) 
+        self.score = "%02d" % self.score
+        score = termcolor.colored(str(self.score)+'分', 'yellow')
+        simpleInfo = ''.join(formattitle + score)
+        return simpleInfo
+#        return '{:<{l}}'.format(simpleInfo,l= 30-len(title.encode('GBK'))+len(simpleInfo)) 
+
     def problemContent(self):
         info1 = '题目内容:'
         info2 = '输入描述:'
@@ -36,5 +41,5 @@ class Problem:
         info4 = '输入样例:'
         info5 = '输出样例:'
         
-        info = '\n'.join(['Id:['+self.Pid + ']' + '\t',self.title,self.timeAndMem,info1,self.content,info2,self.descr_input,info3,self.descr_output,info4,self.ex_input,info5,self.ex_output])
+        info = '\n'.join(['Id:['+self.Pid + ']' + '\t',self.title,info1,self.content,info2,self.descr_input,info3,self.descr_output,info4,self.ex_input,info5,self.ex_output])
         return '\n' + info
