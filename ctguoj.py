@@ -75,6 +75,7 @@ def help_commond():
             " coj show id          | 显示id对应题目的详细信息\n" \
             " coj show id -g c     | 显示题目信息并生成c语言代码文件 可选参数c++ java\n" \
             " coj submit filename  | 提交代码文件判题\n" \
+            " coj login            | 登录\n" \
             " coj help             | 显示更多帮助信息\n" \
             "\n" \
             "--------------------------------------------------\n"
@@ -135,7 +136,7 @@ def main():
             " coj passed id        | 显示已提交题目详细信息\n" \
             " coj login            | 登录\n" \
             "\n" \
-            "--------------------------------------------------\n"
+            "--------------------------------------------------\n" \
             " 更多信息: https://github.com/ctguggbond/ctguOj-cli\n" \
             " 反馈交流群: 681496606\n"
             ShowMessage.info(info)

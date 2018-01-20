@@ -84,6 +84,7 @@ def login(isauto,username,password):
                         ShowMessage.success('保存密码成功  :)')
                     except:
                         pass
+                ShowMessage.info('\'coj list -c\'查看比赛列表.\n')
             break
         tryloginTime = tryloginTime -1
     if tryloginTime <= 0:
