@@ -1,5 +1,9 @@
 # ctguoj-cli
 
+
+**已迁移到新的项目: https://github.com/ctguggbond/aoj-cli**
+
+
 用了leetcode-cli感觉很丝滑，做一个ctguoj的命令行版，虽然用处不大...
 
 可以看提交过的代码.  通过老师服务器外网可以刷题.感觉比网页更漂亮...
